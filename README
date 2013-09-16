@@ -1,0 +1,14 @@
+This tool tests upgrades of RDO packages (using packstack). Currently, it just
+tests Grizzly->Havana in the default configuration. On a clean EL6 system:
+
+  # ./test_rdo_upgrade.sh
+
+Should:
+
+1. Install Grizzly
+2. Create and verify a CirrOS guest
+3. Shut everything down
+4. Upgrade to Havana
+5. Start everything up
+6. Verify that the Grizzly guest is still okay
+7. Create and verify a(nother) CirrOS guest
