@@ -1,6 +1,10 @@
 RDO_BASE="http://rdo.fedorapeople.org"
 CIRROS="https://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-disk.img"
 
+AUTHORIZED_KEYS_FILE=$HOME/.ssh/authorized_keys
+PRIVATE_KEY_FILE=$HOME/.ssh/id_rsa
+PUBLIC_KEY_FILE=${PRIVATE_KEY_FILE}.pub
+
 # A minimal CentOS install may not have these.
 function install_requirements() {
     yum install -y wget dbus
@@ -15,14 +19,15 @@ function start_dbus() {
 # on its own, so the following functions set ssh access for
 # root to root@localhost and check that it works.
 function generate_ssh_key() {
-    if ! [ -f $HOME/.ssh/id_rsa ]; then
-        ssh-keygen -t rsa -b 2047 -f $HOME/.ssh/id_rsa -N ''
+    if ! [ -f $PRIVATE_KEY_FILE ]; then
+        ssh-keygen -t rsa -b 2047 -f $PRIVATE_KEY_FILE -N ''
     fi
 }
 
 function configure_authorized_keys() {
-    if ! grep -q -f $HOME/.ssh/id_rsa.pub $HOME/.ssh/authorized_keys; then
-        cat $HOME/.ssh/id_rsa.pub >> $HOME/.ssh/authorized_keys
+    if ! grep -q -f $PUBLIC_KEY_FILE $AUTHORIZED_KEYS_FILE; then
+        cat $PUBLIC_KEY_FILE >> $AUTHORIZED_KEYS_FILE
+	chmod 600 $AUTHORIZED_KEYS_FILE
     fi
 }
 
