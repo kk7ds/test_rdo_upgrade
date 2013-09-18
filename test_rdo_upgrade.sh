@@ -6,6 +6,9 @@ source upgrade_functions.sh
 # NOTE(dansmith): bug 1006484: Disable SELinux for glance-2012.2
 setenforce 0
 
+install_requirements
+start_dbus
+
 # Install the RDO repositories
 install_rdo_release grizzly
 

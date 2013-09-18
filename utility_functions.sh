@@ -1,6 +1,16 @@
 RDO_BASE="http://rdo.fedorapeople.org"
 CIRROS="https://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-disk.img"
 
+# A minimal CentOS install may not have these.
+function install_requirements() {
+    yum install -y wget dbus
+}
+
+# If dbus isn't running the compute service will fail to start.
+function start_dbus() {
+	service messagebus start
+}
+
 function install_rdo_release() {
     local release="$1"
 
