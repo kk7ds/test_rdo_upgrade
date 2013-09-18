@@ -11,6 +11,33 @@ function start_dbus() {
 	service messagebus start
 }
 
+# Packstack seems to have a hard time getting things set up
+# on its own, so the following functions set ssh access for
+# root to root@localhost and check that it works.
+function generate_ssh_key() {
+    if ! [ -f $HOME/.ssh/id_rsa ]; then
+        ssh-keygen -t rsa -b 2047 -f $HOME/.ssh/id_rsa -N ''
+    fi
+}
+
+function configure_authorized_keys() {
+    if ! grep -q -f $HOME/.ssh/id_rsa.pub $HOME/.ssh/authorized_keys; then
+        cat $HOME/.ssh/id_rsa.pub >> $HOME/.ssh/authorized_keys
+    fi
+}
+
+function test_ssh_connection() {
+    if ! ssh -o StrictHostKeyChecking=no -o BatchMode=yes localhost true; then
+        die "ssh connection to localhost failed."
+    fi
+}
+
+function configure_ssh_keys() {
+    generate_ssh_key
+    configure_authorized_keys
+    test_ssh_connection
+}
+
 function install_rdo_release() {
     local release="$1"
 
