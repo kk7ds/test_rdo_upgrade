@@ -45,7 +45,7 @@ function create_instance() {
 
 function die() {
     reason="$*"
-    echo "ERROR: $reason"
+    echo "ERROR: $reason" >&2
     exit 1
 }
 
