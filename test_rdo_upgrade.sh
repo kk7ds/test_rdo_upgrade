@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ex
 
 source utility_functions.sh
 source upgrade_functions.sh
@@ -15,6 +15,7 @@ install_rdo_release grizzly
 
 # Install openstack with packstack
 do_packstack
+merge_config_and_rerun_packstack
 
 # Gain credentials and create/test a VM
 source ~/keystonerc_admin
@@ -28,6 +29,9 @@ install_rdo_release havana
 # Do Grizzly->Havana upgrades
 upgrade_dbs
 upgrade_add_sheepdog
+upgrade_packstack_config
+do_packstack
+upgrade_other_computes
 
 # Start everything back up, test the original VM and create/test another
 service_control start

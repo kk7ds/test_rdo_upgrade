@@ -12,3 +12,14 @@ Should:
 5. Start everything up
 6. Verify that the Grizzly guest is still okay
 7. Create and verify a(nother) CirrOS guest
+
+== NOTES ==
+
+=== Config Tweaks ===
+
+If you have a packstack-config.post file in the current directory, the script
+will try to make those changes to the answers file and re-run packstack before
+starting the upgrade. This can be used to do a multi-node install by putting
+the following in the post file:
+
+  CONFIG_NOVA_COMPUTE_HOSTS=192.168.1.1,192.168.1.2

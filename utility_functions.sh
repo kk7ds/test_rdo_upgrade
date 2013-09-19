@@ -54,8 +54,12 @@ function install_rdo_release() {
     fi
 }
 
+function get_packstack_answers() {
+    ls ~/packstack-answers*txt 2>/dev/null | cut -d ' ' -f 1
+}
+
 function do_packstack() {
-    answers=$(ls ~/packstack-answers*txt 2>/dev/null | cut -d ' ' -f 1)
+    local answers=$(get_packstack_answers)
     if rpm -q openstack-packstack | grep -q 2013.1; then
 	neutron=quantum
     else
@@ -67,6 +71,21 @@ function do_packstack() {
     else
 	packstack --allinone --os-${neutron}-install=n
     fi
+}
+
+function merge_config_and_rerun_packstack() {
+    local answers=$(get_packstack_answers)
+    if [ ! -f "packstack-config.post" ]; then
+	return
+    fi
+    cp ${answers} ${answers}.orig-grizzly
+    for line in $(cat packstack-config.post); do
+	local name=$(echo $line | cut -d= -f1)
+	local value=$(echo $line | cut -d= -f2-)
+	echo Setting ${name}=${value}
+	sed -ri "s/^${name}=(.*)$/${name}=${value}/" $answers
+    done
+    do_packstack
 }
 
 function create_instance() {
@@ -128,4 +147,3 @@ function service_control() {
 	service $service "$action"
     done
 }
-
