@@ -1,6 +1,48 @@
 RDO_BASE="http://rdo.fedorapeople.org"
 CIRROS="https://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-disk.img"
 
+AUTHORIZED_KEYS_FILE=$HOME/.ssh/authorized_keys
+PRIVATE_KEY_FILE=$HOME/.ssh/id_rsa
+PUBLIC_KEY_FILE=${PRIVATE_KEY_FILE}.pub
+
+# A minimal CentOS install may not have these.
+function install_requirements() {
+    yum install -y wget dbus
+}
+
+# If dbus isn't running the compute service will fail to start.
+function start_dbus() {
+	service messagebus start
+}
+
+# Packstack seems to have a hard time getting things set up
+# on its own, so the following functions set ssh access for
+# root to root@localhost and check that it works.
+function generate_ssh_key() {
+    if ! [ -f $PRIVATE_KEY_FILE ]; then
+        ssh-keygen -t rsa -b 2047 -f $PRIVATE_KEY_FILE -N ''
+    fi
+}
+
+function configure_authorized_keys() {
+    if ! grep -q -f $PUBLIC_KEY_FILE $AUTHORIZED_KEYS_FILE; then
+        cat $PUBLIC_KEY_FILE >> $AUTHORIZED_KEYS_FILE
+	chmod 600 $AUTHORIZED_KEYS_FILE
+    fi
+}
+
+function test_ssh_connection() {
+    if ! ssh -o StrictHostKeyChecking=no -o BatchMode=yes localhost true; then
+        die "ssh connection to localhost failed."
+    fi
+}
+
+function configure_ssh_keys() {
+    generate_ssh_key
+    configure_authorized_keys
+    test_ssh_connection
+}
+
 function install_rdo_release() {
     local release="$1"
 
@@ -45,7 +87,7 @@ function create_instance() {
 
 function die() {
     reason="$*"
-    echo "ERROR: $reason"
+    echo "ERROR: $reason" >&2
     exit 1
 }
 
