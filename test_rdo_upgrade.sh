@@ -20,7 +20,6 @@ do_packstack
 source ~/keystonerc_admin
 create_instance test-grizzly
 test_instance test-grizzly
-delete_instance test-grizzly
 
 # Shut down everything and upgrade to havana packages
 service_control stop
@@ -35,5 +34,3 @@ service_control start
 test_instance test-grizzly
 create_instance test-havana
 test_instance test-havana
-delete_instance test-havana
-

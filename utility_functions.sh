@@ -12,7 +12,7 @@ function install_requirements() {
 
 # If dbus isn't running the compute service will fail to start.
 function start_dbus() {
-    service messagebus start
+	service messagebus start
 }
 
 # Packstack seems to have a hard time getting things set up
@@ -20,20 +20,20 @@ function start_dbus() {
 # root to root@localhost and check that it works.
 function generate_ssh_key() {
     if ! [ -f $PRIVATE_KEY_FILE ]; then
-	ssh-keygen -t rsa -b 2047 -f $PRIVATE_KEY_FILE -N ''
+        ssh-keygen -t rsa -b 2047 -f $PRIVATE_KEY_FILE -N ''
     fi
 }
 
 function configure_authorized_keys() {
     if ! grep -q -f $PUBLIC_KEY_FILE $AUTHORIZED_KEYS_FILE; then
-	cat $PUBLIC_KEY_FILE >> $AUTHORIZED_KEYS_FILE
+        cat $PUBLIC_KEY_FILE >> $AUTHORIZED_KEYS_FILE
 	chmod 600 $AUTHORIZED_KEYS_FILE
     fi
 }
 
 function test_ssh_connection() {
     if ! ssh -o StrictHostKeyChecking=no -o BatchMode=yes localhost true; then
-	die "ssh connection to localhost failed."
+        die "ssh connection to localhost failed."
     fi
 }
 
@@ -115,11 +115,6 @@ function test_instance() {
 	die 'Failed to connect to test instance console'
     }
     echo "*** Test instance $name looks OK ***"
-}
-
-function delete_instance() {
-    local name=$1
-    nova delete $name
 }
 
 function destroy_instance() {
