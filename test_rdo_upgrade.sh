@@ -1,7 +1,9 @@
 #!/bin/bash -ex
 
-source utility_functions.sh
-source upgrade_functions.sh
+basedir=$(dirname `readlink -f $0`)
+
+source ${basedir}/utility_functions.sh
+source ${basedir}/upgrade_functions.sh
 
 # NOTE(dansmith): bug 1006484: Disable SELinux for glance-2012.2
 setenforce 0
