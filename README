@@ -1,9 +1,10 @@
-This tool tests upgrades of RDO packages (using packstack). Currently, it just
-tests Grizzly->Havana in the default configuration. On a clean EL6 system:
+This tool tests upgrades of RDO packages (using packstack). It provides some
+utility functions for doing various things, and can run named scenarios.
+To test a Grizzly->Havana, do something like this on a clean EL6:
 
-  # ./test_rdo_upgrade.sh
+  # ./test_rdo_upgrade.sh grizzly2havana
 
-Should:
+Which should:
 
 1. Install Grizzly
 2. Create and verify a CirrOS guest
@@ -15,11 +16,15 @@ Should:
 
 == NOTES ==
 
+=== Scenarios ===
+
+Additional scenarios can be placed in the scenarios/directory.
+
 === Config Tweaks ===
 
-If you have a packstack-config.post file in the current directory, the script
-will try to make those changes to the answers file and re-run packstack before
-starting the upgrade. This can be used to do a multi-node install by putting
-the following in the post file:
+If you have a packstack-config.post file in the current directory, the
+grizzly2havana scenario will try to make those changes to the answers file and
+re-run packstack before starting the upgrade. This can be used to do a
+multi-node install by putting the following in the post file:
 
   CONFIG_NOVA_COMPUTE_HOSTS=192.168.1.1,192.168.1.2
