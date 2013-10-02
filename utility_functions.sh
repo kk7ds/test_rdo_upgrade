@@ -103,14 +103,13 @@ function create_instance() {
 
     if [ ! -f ~/cirros.img ]; then
 	wget -O ~/cirros.img "$CIRROS"
+	if ! glance image-show cirros >/dev/null 2>&1; then
+	    glance image-create --name cirros --is-public True \
+		--disk-format qcow2 --container-format bare < ~/cirros.img
+	fi
     fi
 
-    if ! glance image-show cirros >/dev/null 2>&1; then
-	glance image-create --name cirros --is-public True \
-	    --disk-format qcow2 --container-format bare < ~/cirros.img
-    fi
-
-    nova delete "$name"
+    nova delete "$name" || true
     nova boot --poll --image cirros --flavor 1 "$name"
 }
 
