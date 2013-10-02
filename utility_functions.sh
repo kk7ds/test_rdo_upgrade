@@ -98,6 +98,46 @@ function merge_config_and_rerun_packstack() {
     do_packstack
 }
 
+function conservative_nova_check() {
+    local api_ok
+    local services_ok
+    local services_orig=$(mktemp)
+    local services_new=$(mktemp)
+
+    nova-manage service list > $services_orig 2>&1
+
+    for i in $(seq 0 10); do
+	if nova list; then
+	    api_ok=yes
+	    break
+	fi
+    done
+
+    if [ -z "$api_ok" ]; then
+	die "nova-api appears dead"
+    fi
+
+    for i in $(seq 0 30); do
+	nova-manage service list > $services_new 2>&1
+	if diff -q $services_orig $services_new; then
+	    sleep 1
+	    continue
+	fi
+	if grep XXX $services_new; then
+	    sleep 1
+	    continue
+	fi
+	services_ok=yes
+	break
+    done
+
+    rm -f $services_orig $services_new
+
+    if [ -z "$services_ok" ]; then
+	die "nova services appear dead"
+    fi
+}
+
 function create_instance() {
     local name="$1"
 
