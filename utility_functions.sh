@@ -156,7 +156,7 @@ function service_control() {
     local action="$1"
     local service="$2"
     local svc
-    for svc in $(chkconfig --list | grep 'openstack-${2}.*3:on' | \
+    for svc in $(chkconfig --list | grep "openstack-${service}.*3:on" | \
 	    awk '{print $1}'); do
 	service $svc "$action"
     done
