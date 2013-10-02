@@ -13,6 +13,7 @@ test_instance test-grizzly
 # Shut down everything and upgrade to havana packages
 service_control stop
 install_rdo_release havana
+upgrade_rdo_release
 
 # Do Grizzly->Havana upgrades
 upgrade_dbs

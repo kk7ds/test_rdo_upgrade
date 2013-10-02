@@ -48,10 +48,16 @@ function install_rdo_release() {
 
     yum install -y ${RDO_BASE}/openstack-${release}/rdo-release-${release}.rpm
     if rpm -q openstack-packstack > /dev/null; then
-	yum update -y openstack-*
+	yum update -y openstack-packstack
     else
 	yum install -y openstack-packstack
     fi
+}
+
+function upgrade_rdo_release() {
+    local which="$1"
+
+    yum update -y "openstack-${which}*"
 }
 
 function get_packstack_answers() {
@@ -143,7 +149,9 @@ function destroy_instance() {
 
 function service_control() {
     action="$1"
-    for service in $(chkconfig --list | grep 'openstack.*3:on' | awk '{print $1}'); do
+    service="$2"
+    for service in $(chkconfig --list | grep 'openstack-${2}.*3:on' | \
+	    awk '{print $1}'); do
 	service $service "$action"
     done
 }
