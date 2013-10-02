@@ -1,4 +1,5 @@
 function upgrade_dbs() {
+    local service
     for service in nova glance cinder keystone; do
 	if ${service}-manage --help 2>&1 | grep -q upgrade; then
 	    ${service}-manage upgrade
@@ -38,6 +39,7 @@ function upgrade_other_computes() {
     local computes=$(grep 'COMPUTE_HOSTS' $answers | cut -d= -f2 | sed 's/,/ /')
     local me=$(grep 'NOVA_API_HOST' $answers | cut -d= -f2)
     local pkgs="openstack-nova-compute python-oslo-config"
+    local compute
     for compute in $computes; do
 	if [ "$compute" = "$me" ]; then
 	    echo Skipping myself
