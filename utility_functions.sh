@@ -45,8 +45,11 @@ function configure_ssh_keys() {
 
 function install_rdo_release() {
     local release="$1"
+    local package="rdo-release-${release}"
 
-    yum install -y ${RDO_BASE}/openstack-${release}/rdo-release-${release}.rpm
+    if ! rpm -q $package > /dev/null; then
+	yum install -y ${RDO_BASE}/openstack-${release}/${package}.rpm
+    fi
     if rpm -q openstack-packstack > /dev/null; then
 	yum update -y openstack-packstack
     else
