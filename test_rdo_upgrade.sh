@@ -5,6 +5,10 @@ basedir=$(dirname `readlink -f $0`)
 source ${basedir}/utility_functions.sh
 source ${basedir}/upgrade_functions.sh
 
+if [ -f "${basedir}/local.sh" ]; then
+    source ${basedir}/local.sh
+fi
+
 function usage() {
     echo "usage: test_rdo_upgrade [scenario]"
     exit 1
