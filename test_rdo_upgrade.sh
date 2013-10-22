@@ -26,7 +26,7 @@ if [ -z "$1" ]; then
 fi
 
 scenario_file="${basedir}/scenarios/${1}.sh"
-if [ ! -x  "$scenario_file" ]; then
+if [ ! -f  "$scenario_file" ]; then
     echo "Scenario \`$1' not found"
     usage
 fi
