@@ -7,6 +7,7 @@ merge_config_and_rerun_packstack
 
 # Gain credentials and create/test a VM
 source ~/keystonerc_admin
+install_cirros
 create_instance test-grizzly
 test_instance test-grizzly
 

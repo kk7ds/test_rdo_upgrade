@@ -5,6 +5,7 @@ opts="$opts --nagios-install=n"
 packstack --allinone $opts
 
 source ~/keystonerc_admin
+install_cirros
 create_instance test-grizzly
 test_instance test-grizzly
 

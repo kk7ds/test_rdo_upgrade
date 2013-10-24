@@ -138,16 +138,18 @@ function conservative_nova_check() {
     fi
 }
 
-function create_instance() {
-    local name="$1"
-
+function install_cirros() {
     if [ ! -f ~/cirros.img ]; then
 	wget -O ~/cirros.img "$CIRROS"
-	if ! glance image-show cirros >/dev/null 2>&1; then
-	    glance image-create --name cirros --is-public True \
-		--disk-format qcow2 --container-format bare < ~/cirros.img
-	fi
     fi
+    if ! glance image-show cirros >/dev/null 2>&1; then
+	glance image-create --name cirros --is-public True \
+	    --disk-format qcow2 --container-format bare < ~/cirros.img
+    fi
+}
+
+function create_instance() {
+    local name="$1"
 
     nova delete "$name" || true
     nova boot --poll --image cirros --flavor 1 "$name"
