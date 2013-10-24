@@ -16,7 +16,9 @@ source ~/keystonerc_admin
 install_cirros
 
 # Create an instance on the grizzly system, before we do any upgrades
-source ~/keystonerc_demo
+if [ "$do_neutron" = "y" ]; then
+    source ~/keystonerc_demo
+fi
 create_instance test-grizzly
 test_instance test-grizzly
 
