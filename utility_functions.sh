@@ -202,3 +202,13 @@ function service_control() {
 	service $svc "$action"
     done
 }
+
+function ensure_openstack_kernel() {
+    if ! uname -r | grep -q openstack; then
+	yum upgrade -y kernel
+	echo '******************************************'
+	echo '* A reboot is required before continuing *'
+	echo '******************************************'
+	exit 1
+    fi
+}
