@@ -13,26 +13,29 @@ opts="$opts --nagios-install=n"
 packstack --allinone $opts
 
 source ~/keystonerc_admin
+set_neutron_name
 install_cirros
 
 # Create an instance on the grizzly system, before we do any upgrades
 if [ "$do_neutron" = "y" ]; then
     source ~/keystonerc_demo
+    test_instance=test_instance_floating_ip
+    create_instance=create_instance_with_floatingip
+    services="keystone glance cinder quantum nova"
+else
+    test_instance=test_instance
+    create_instance=create_instance
+    services="keystone glance cinder nova"
 fi
-create_instance test-grizzly
-test_instance test-grizzly
+
+$create_instance test-grizzly
+$test_instance test-grizzly
 
 ##############################################################################
 # This is the beginning of the upgrade process                               #
 ##############################################################################
 
 install_rdo_release havana
-
-if [ "$do_neutron" = "y" ]; then
-    services="keystone glance cinder quantum nova"
-else
-    services="keystone glance cinder nova"
-fi
 
 for service in $services; do
     # Stop everything for the service we're upgrading
@@ -59,6 +62,6 @@ for service in $services; do
 
     # Do some checks to make sure everything is happy before we proceed
     conservative_nova_check
-    create_instance test-$service
-    test_instance test-$service
+    $create_instance test-$service
+    $test_instance test-$service
 done
