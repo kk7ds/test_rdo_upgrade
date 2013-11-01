@@ -4,6 +4,7 @@ CIRROS="https://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-d
 AUTHORIZED_KEYS_FILE=$HOME/.ssh/authorized_keys
 PRIVATE_KEY_FILE=$HOME/.ssh/id_rsa
 PUBLIC_KEY_FILE=${PRIVATE_KEY_FILE}.pub
+TIMEOUT=60
 
 # A minimal CentOS install may not have these.
 function install_requirements() {
@@ -43,6 +44,13 @@ function configure_ssh_keys() {
     test_ssh_connection
 }
 
+function set_neutron_name() {
+    neutron=quantum
+    if rpm -q openstack-packstack > /dev/null && ! rpm -q openstack-packstack | grep -q 2013.1; then
+        neutron=neutron
+    fi
+}
+
 function install_rdo_release() {
     local release="$1"
     local package="rdo-release-${release}"
@@ -69,11 +77,8 @@ function get_packstack_answers() {
 
 function do_packstack() {
     local answers=$(get_packstack_answers)
-    if rpm -q openstack-packstack | grep -q 2013.1; then
-	local neutron=quantum
-    else
-	local neutron=neutron
-    fi
+
+    set_neutron_name
 
     if [ "$answers" -a -f "$answers" ]; then
 	packstack --answer-file "$answers"
@@ -148,6 +153,31 @@ function install_cirros() {
     fi
 }
 
+function get_private_ip() {
+    nova show $1 | awk '/private network/ { print $5 }' | sed 's/,//'
+}
+
+function associate_floating_ip() {
+    local private_ip=$(get_private_ip $1)
+    local port_id=$($neutron port-list | awk "/$private_ip/ { print \$2 }")
+    local floating_ip_id=$($neutron floatingip-create public | \
+        awk "/^\| id[ ]*\| / { print \$4 }")
+
+    $neutron floatingip-associate $floating_ip_id $port_id
+}
+
+function get_floating_ip() {
+    local private_ip=$(get_private_ip $1)
+    $neutron floatingip-list | awk "/$private_ip/ { print \$6 }"
+}
+
+function create_instance_with_floatingip() {
+    local name="$1"
+
+    create_instance $name
+    associate_floating_ip $name
+}
+
 function create_instance() {
     local name="$1"
 
@@ -164,7 +194,7 @@ function die() {
 function try_instance() {
     local cmd="$1"
     local i
-    for i in $(seq 0 20); do
+    for i in $(seq 0 $TIMEOUT); do
 	($cmd) >/dev/null 2>&1 && return 0
 	sleep 1
     done
@@ -176,14 +206,26 @@ function check_instance_console() {
     nova console-log "$name" | grep cubswin
 }
 
-function test_instance() {
+function test_instance_floating_ip() {
     local name="$1"
+    local floating_ip=$(get_floating_ip $name)
+    _test_instance $name $floating_ip
+}
+
+function test_instance() {
     local ipaddr=$(nova show "$name" | grep network | cut -d '|' -f 3)
+    _test_instance $1 $ipaddr
+}
+
+function _test_instance() {
+    local name="$1"
+    local ipaddr="$2"
+
     try_instance "ping -c1 $ipaddr" || {
-	die 'Failed to ping test instance at $ipaddr'
+        die 'Failed to ping test instance at $ipaddr'
     }
     try_instance "check_instance_console $name" || {
-	die 'Failed to connect to test instance console'
+        die 'Failed to connect to test instance console'
     }
     echo "*** Test instance $name looks OK ***"
 }
@@ -212,3 +254,4 @@ function ensure_openstack_kernel() {
 	exit 1
     fi
 }
+
