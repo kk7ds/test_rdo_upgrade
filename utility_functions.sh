@@ -81,9 +81,9 @@ function do_packstack() {
     set_neutron_name
 
     if [ "$answers" -a -f "$answers" ]; then
-	packstack --answer-file "$answers"
+        packstack --answer-file "$answers"
     else
-	packstack --allinone --os-${neutron}-install=n
+        packstack --allinone --os-${neutron}-install=n
     fi
 }
 
@@ -239,7 +239,11 @@ function service_control() {
     local action="$1"
     local service="$2"
     local svc
-    for svc in $(chkconfig --list | grep "openstack-${service}.*3:on" | \
+    local pattern="openstack-${service}.*3:on"
+    if [ "x$service" == "xneutron" -o "x$service" == "xquantum" ]; then
+        pattern="${service}.*3:on"
+    fi
+    for svc in $(chkconfig --list | grep $pattern | \
 	    awk '{print $1}'); do
 	service $svc "$action"
     done

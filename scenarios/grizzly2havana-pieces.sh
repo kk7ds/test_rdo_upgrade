@@ -43,7 +43,7 @@ for service in $services; do
 
     # If we're upgrading quantum, the new name is neutron
     if [ "$service" = "quantum" ]; then
-	service="neutron"
+        service="neutron"
     fi
 
     # Upgrade the packages
@@ -51,10 +51,9 @@ for service in $services; do
 
     # Upgrade the database schema
     if [ "$service" = "neutron" ]; then
-	upgrade_migrate_quantum_config
-	upgrade_neutron_db "grizzly" "havana"
+        upgrade_neutron_db "havana"
     else
-	upgrade_dbs
+        upgrade_dbs
     fi
 
     # Start everything back up on the new version of this service
