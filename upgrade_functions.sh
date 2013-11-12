@@ -12,11 +12,8 @@ function upgrade_dbs() {
 }
 
 function upgrade_neutron_db() {
-    local from="$1"
-    local to="$2"
+    local to="$1"
 
-    neutron-db-manage --config-file=/etc/neutron/neutron.conf \
-	--config-file /etc/neutron/plugin.ini stamp "$from"
     neutron-db-manage --config-file=/etc/neutron/neutron.conf \
 	--config-file /etc/neutron/plugin.ini upgrade "$to"
 }
@@ -60,10 +57,3 @@ function upgrade_other_computes() {
     done
 }
 
-function upgrade_migrate_quantum_config() {
-    cp -f /etc/quantum/quantum.conf.rpmsave /etc/neutron/neutron.conf
-    local plugin=$(readlink -f /etc/quantum/plugin.ini)
-    plugin="${plugin}.rpmsave"
-    rm -f /etc/neutron/plugin.ini
-    cp $plugin /etc/neutron/plugin.ini
-}

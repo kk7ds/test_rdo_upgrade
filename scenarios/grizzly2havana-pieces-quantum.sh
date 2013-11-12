@@ -1,2 +1,2 @@
 do_neutron=y
-source grizzly2havana-pieces
+source ${basedir}/scenarios/grizzly2havana-pieces.sh
