@@ -213,7 +213,7 @@ function test_instance_floating_ip() {
 }
 
 function test_instance() {
-    local ipaddr=$(nova show "$name" | grep network | cut -d '|' -f 3)
+    local ipaddr=$(nova show "$1" | grep network | cut -d '|' -f 3)
     _test_instance $1 $ipaddr
 }
 
@@ -259,3 +259,6 @@ function ensure_openstack_kernel() {
     fi
 }
 
+function fssh() {
+    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $1 "$2"
+}
