@@ -262,3 +262,10 @@ function ensure_openstack_kernel() {
 function fssh() {
     ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $1 "$2"
 }
+
+function set_config() {
+    local key="$1"
+    local val="$2"
+    local file="$3"
+    sed -ri "s#${key}=.*#${key}=${val}#" $file
+}
