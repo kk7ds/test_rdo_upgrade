@@ -1,6 +1,3 @@
-
-install_rdo_release havana
-
 hosts="$2"
 if [ -z "$hosts" ]; then
     echo 'Must specify compute hosts on the command line (host1,host2)'
@@ -8,6 +5,7 @@ if [ -z "$hosts" ]; then
 fi
 
 # Configure and run packstack from Havana
+install_rdo_release havana
 packstack --gen-answer-file ~/answers.txt
 set_config COMPUTE_HOSTS "$hosts" ~/answers.txt
 set_config NEUTRON_INSTALL n ~/answers.txt
@@ -43,10 +41,14 @@ pip install oauthlib
 # Remove UTF-8 sanity check from glance database upgrade
 sed -ri 's/^    _db_schema_sanity_check.*$//' /usr/lib/python2.6/site-packages/glance/openstack/common/db/sqlalchemy/migration.py
 
-# UPGRADE HACK: We need to upgrade the qpid_topology on the havana compute hosts
+# UPGRADE STEP: We need to upgrade the qpid_topology on the havana compute hosts
 for index in $(seq 0 $(($num_hosts - 1))); do
     fssh ${hosts[$index]} "sed -ri 's/^.*qpid_topology_version.*/qpid_topology_version=2/' /etc/nova/nova.conf && service openstack-nova-compute restart"
 done
+
+# UPGRADE STEP: We need to cap the compute RPC API version on the
+# new controller infrastructure until all computes have been upgraded
+set_config compute icehouse-compat /etc/nova/nova.conf
 
 # Stop all the controller services, upgrade the database,
 # and then start them back up

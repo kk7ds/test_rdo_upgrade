@@ -227,6 +227,9 @@ function _test_instance() {
     try_instance "check_instance_console $name" || {
         die 'Failed to connect to test instance console'
     }
+    nova diagnostics $name >/tmp/diags 2>&1 || {
+	die 'Failed to retrieve diagnostics for instance'
+    }
     echo "*** Test instance $name looks OK ***"
 }
 
@@ -267,5 +270,5 @@ function set_config() {
     local key="$1"
     local val="$2"
     local file="$3"
-    sed -ri "s#${key}=.*#${key}=${val}#" $file
+    sed -ri "s#\#?${key}=.*#${key}=${val}#" $file
 }
