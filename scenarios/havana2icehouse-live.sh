@@ -101,3 +101,12 @@ for inst in $instances; do
     echo "$inst running on $host" >> /tmp/report
 done
 cat /tmp/report
+
+# Install user and host keys between all compute nodes
+for host in ${hosts[*]}; do
+    fssh $host "rm -Rf /var/lib/nova/.ssh && cp -r /root/.ssh /var/lib/nova/ && chown -R nova.nova /var/lib/nova/.ssh"
+    fssh $host "setenforce 0; usermod -s /bin/bash nova"
+done
+for host in ${hosts[*]}; do
+    fssh $host "for host in ${hosts[*]}; do su - nova -c 'ssh -oStrictHostKeyChecking=no \$host true'; done"
+done
