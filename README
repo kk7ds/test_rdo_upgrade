@@ -1,30 +1,26 @@
 This tool tests upgrades of RDO packages (using packstack). It provides some
 utility functions for doing various things, and can run named scenarios.
-To test a Grizzly->Havana, do something like this on a clean EL6:
+To test a Havana->Icehouse live upgrade, do something like this on a clean EL6:
 
-  # ./test_rdo_upgrade.sh grizzly2havana
+  # ./test_rdo_upgrade.sh havana2icehouse-live compute1,compute2
 
 Which should:
 
-1. Install Grizzly
-2. Create and verify a CirrOS guest
-3. Shut everything down
-4. Upgrade to Havana
-5. Start everything up
-6. Verify that the Grizzly guest is still okay
-7. Create and verify a(nother) CirrOS guest
+1. Install Havana
+2. Create and verify some test instances
+3. Upgrade the controller to Icehouse
+4. Create some more guests
+5. Upgrade the first compute host to Icehouse
+6. Create some more guests
+
+When finished, you should have guests spread across all compute hosts,
+with the controller on Icehouse, the first compute host on Icehouse,
+and the remaining compute hosts still running on Havana. User and host
+keys will be distributed to all compute hosts to allow testing of cold
+and live migration scenarios.
 
 == NOTES ==
 
 === Scenarios ===
 
 Additional scenarios can be placed in the scenarios/directory.
-
-=== Config Tweaks ===
-
-If you have a packstack-config.post file in the current directory, the
-grizzly2havana scenario will try to make those changes to the answers file and
-re-run packstack before starting the upgrade. This can be used to do a
-multi-node install by putting the following in the post file:
-
-  CONFIG_NOVA_COMPUTE_HOSTS=192.168.1.1,192.168.1.2
