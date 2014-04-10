@@ -49,6 +49,9 @@ done
 # UPGRADE STEP: We need to cap the compute RPC API version on the
 # new controller infrastructure until all computes have been upgraded
 set_config compute icehouse-compat /etc/nova/nova.conf
+for host in ${hosts[*]}; do
+    fssh $host "sed -ri 's/^#compute=.*/compute=icehouse-compat/' /etc/nova/nova.conf && service openstack-nova-compute restart"
+done
 
 # Stop all the controller services, upgrade the database,
 # and then start them back up
@@ -91,6 +94,17 @@ create_instance test-icehouse4
 test_instance test-icehouse3
 test_instance test-icehouse4
 
+# Install user and host keys between all compute nodes
+for host in ${hosts[*]}; do
+    fssh $host "rm -Rf /var/lib/nova/.ssh && cp -r /root/.ssh /var/lib/nova/ && chown -R nova.nova /var/lib/nova/.ssh"
+    fssh $host "setenforce 0; usermod -s /bin/bash nova"
+done
+for host in ${hosts[*]}; do
+    for other in ${hosts[*]}; do
+	fssh $host "su - nova -c 'ssh -oStrictHostKeyChecking=no $other true'"
+    done
+done
+
 # Generate a report of all the running instances and where they are,
 # to allow verification that the instances are spread across computes
 echo 'Instance report' > /tmp/report
@@ -102,11 +116,3 @@ for inst in $instances; do
 done
 cat /tmp/report
 
-# Install user and host keys between all compute nodes
-for host in ${hosts[*]}; do
-    fssh $host "rm -Rf /var/lib/nova/.ssh && cp -r /root/.ssh /var/lib/nova/ && chown -R nova.nova /var/lib/nova/.ssh"
-    fssh $host "setenforce 0; usermod -s /bin/bash nova"
-done
-for host in ${hosts[*]}; do
-    fssh $host "for host in ${hosts[*]}; do su - nova -c 'ssh -oStrictHostKeyChecking=no \$host true'; done"
-done
